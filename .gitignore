@@ -1,0 +1,5 @@
+openwrt-usb-webcam
+openwrt-usb-webcam-yuyv
+*.o
+*.log
+.DS_Store
