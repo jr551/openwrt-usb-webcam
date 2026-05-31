@@ -21,10 +21,10 @@ openwrt-usb-webcam-yuyv: $(YUYV_SRC)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $< $(LIBUSB_A) -o $@
 
 install: openwrt-usb-webcam
-	install -m 0755 openwrt-usb-webcam /usr/local/bin/backdoor-cam
-	install -m 0755 openwrt/backdoor-cam.init /etc/init.d/backdoor-cam
-	/etc/init.d/backdoor-cam enable
-	/etc/init.d/backdoor-cam restart
+	install -m 0755 openwrt-usb-webcam /usr/local/bin/usb-webcam
+	install -m 0755 openwrt/usb-webcam.init /etc/init.d/usb-webcam
+	/etc/init.d/usb-webcam enable
+	/etc/init.d/usb-webcam restart
 
 clean:
 	rm -f openwrt-usb-webcam openwrt-usb-webcam-yuyv

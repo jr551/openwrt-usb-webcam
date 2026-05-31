@@ -16,6 +16,12 @@
 #define PS 800
 #define NP 16
 #define MAXF (512*1024)
+#ifndef USB_WEBCAM_VID
+#define USB_WEBCAM_VID 0x1bcf
+#endif
+#ifndef USB_WEBCAM_PID
+#define USB_WEBCAM_PID 0x2701
+#endif
 
 static volatile int run = 1;
 static libusb_context *ctx;
@@ -127,9 +133,9 @@ static void handle(int fd) {
     if (n <= 0) { close(fd); return; } r[n]=0;
     if (strstr(r, "GET /index") || (strstr(r, "GET /") && !strstr(r, "GET /frame"))) {
         const char *html = "HTTP/1.1 200\r\nContent-Type: text/html\r\n\r\n"
-            "<html><head><title>Back Door Cam</title>"
+            "<html><head><title>USB Webcam</title>"
             "</head><body bgcolor=black><center>"
-            "<h2 style=\"color:#fff\">Back Door Camera</h2>"
+            "<h2 style=\"color:#fff\">USB Webcam</h2>"
             "<img id=\"cam\" src=\"/frame\" style=\"max-width:100%;image-rendering:auto\">"
             "<script>setInterval(function(){document.getElementById('cam').src='/frame?t='+Date.now()},3000)</script>"
             "</center></body></html>";
@@ -172,7 +178,7 @@ int main(int a, char **av) {
     setvbuf(stderr,NULL,_IONBF,0);
     fprintf(stderr,"cam port %d\n",port);
     if(libusb_init(&ctx)<0)return 1;
-    h=libusb_open_device_with_vid_pid(ctx,0x1bcf,0x2701);
+    h=libusb_open_device_with_vid_pid(ctx,USB_WEBCAM_VID,USB_WEBCAM_PID);
     if(!h){fprintf(stderr,"no dev\n");libusb_exit(ctx);return 1;}
     libusb_detach_kernel_driver(h,IF_VC);
     libusb_detach_kernel_driver(h,IF_VS);

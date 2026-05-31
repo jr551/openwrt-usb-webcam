@@ -19,6 +19,12 @@
 #define H 240
 #define RAWN (W*H*2)
 #define MAXF (RAWN*2)
+#ifndef USB_WEBCAM_VID
+#define USB_WEBCAM_VID 0x1bcf
+#endif
+#ifndef USB_WEBCAM_PID
+#define USB_WEBCAM_PID 0x2701
+#endif
 
 static volatile int run = 1;
 static libusb_context *ctx;
@@ -48,7 +54,7 @@ static unsigned char clamp(int x) {
 
 static void publish_raw(unsigned char *p, int n) {
     if (n < RAWN) return;
-    FILE *ppm = fopen("/tmp/backdoor-cam.ppm", "wb");
+    FILE *ppm = fopen("/tmp/usb-webcam.ppm", "wb");
     if (!ppm) return;
     fprintf(ppm, "P6\n%d %d\n255\n", W, H);
     for (int i = 0; i + 3 < RAWN; i += 4) {
@@ -63,8 +69,8 @@ static void publish_raw(unsigned char *p, int n) {
         fputc(clamp(r1), ppm); fputc(clamp(g1), ppm); fputc(clamp(b1), ppm);
     }
     fclose(ppm);
-    if (system("/usr/bin/cjpeg -quality 85 /tmp/backdoor-cam.ppm > /tmp/backdoor-cam.jpg 2>/dev/null") != 0) return;
-    FILE *jf = fopen("/tmp/backdoor-cam.jpg", "rb");
+    if (system("/usr/bin/cjpeg -quality 85 /tmp/usb-webcam.ppm > /tmp/usb-webcam.jpg 2>/dev/null") != 0) return;
+    FILE *jf = fopen("/tmp/usb-webcam.jpg", "rb");
     if (!jf) return;
     fseek(jf, 0, SEEK_END);
     long sz = ftell(jf);
@@ -173,7 +179,7 @@ int main(int argc, char **argv) {
     signal(SIGINT, sh); signal(SIGTERM, sh);
     setvbuf(stderr, NULL, _IONBF, 0);
     if (libusb_init(&ctx) < 0) return 1;
-    h = libusb_open_device_with_vid_pid(ctx, 0x1bcf, 0x2701);
+    h = libusb_open_device_with_vid_pid(ctx, USB_WEBCAM_VID, USB_WEBCAM_PID);
     if (!h) return 1;
     libusb_detach_kernel_driver(h, IF_VC);
     libusb_detach_kernel_driver(h, IF_VS);
